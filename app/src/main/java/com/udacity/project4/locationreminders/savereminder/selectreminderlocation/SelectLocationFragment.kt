@@ -105,16 +105,15 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
-//        These coordinates represent the lattitude and longitude of Cairo.
+//        These coordinates represent the lattitude and longitude of my home.
         val latitude = 30.033333
         val longitude = 31.233334
-//        val zoomLevel = 15f
-//
         val homeLatLng = LatLng(latitude, longitude)
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(homeLatLng, DEFAULT_ZOOM_LEVEL))
-        map.addMarker(MarkerOptions().position(homeLatLng))
+        map.addMarker(MarkerOptions().position(homeLatLng).title(getString(R.string.my_home)))
 
         enableMyLocation()
+        setMapLongClick(map)
     }
 
 
@@ -124,6 +123,13 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
             getUserLocation()
         } else {
             requestLocationPermission()
+        }
+    }
+
+    // Called when user makes a long press gesture on the map.
+    private fun setMapLongClick(map: GoogleMap){
+        map.setOnMapLongClickListener { latLng ->
+            map.addMarker(MarkerOptions().position(latLng))
         }
     }
 
