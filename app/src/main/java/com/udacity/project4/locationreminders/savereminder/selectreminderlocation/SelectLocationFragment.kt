@@ -8,9 +8,11 @@ import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
@@ -36,13 +38,16 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     //Use Koin to get the view model of the SaveReminder
     override val _viewModel: SaveReminderViewModel by inject()
     private lateinit var binding: FragmentSelectLocationBinding
-    lateinit var map: GoogleMap
-
+    private lateinit var map: GoogleMap
     private var marker: Marker? = null
-    private val DEFAULT_ZOOM_LEVEL =15f
 
-    companion object{
+
+    // FusedLocationProviderClient - Main class for receiving location updates.
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+
+    companion object {
         private const val REQUEST_LOCATION_PERMISSION = 1
+        private const val DEFAULT_ZOOM_LEVEL = 15f
     }
 
     override fun onCreateView(
@@ -103,55 +108,112 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 //        These coordinates represent the lattitude and longitude of Cairo.
         val latitude = 30.033333
         val longitude = 31.233334
-        val zoomLevel = 15f
-
+//        val zoomLevel = 15f
+//
         val homeLatLng = LatLng(latitude, longitude)
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(homeLatLng, zoomLevel))
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(homeLatLng, DEFAULT_ZOOM_LEVEL))
         map.addMarker(MarkerOptions().position(homeLatLng))
-
-//        val googleOverlay = GroundOverlayOptions()
-//            .image(BitmapDescriptorFactory.fromResource(R.drawable.ic_location))
-//            .position(homeLatLng, overlaySize)
-//        map.addGroundOverlay(googleOverlay)
 
         enableMyLocation()
     }
 
 
     // Checks if users have given their location and sets location enabled if so.
-    @SuppressLint("MissingPermission")
     private fun enableMyLocation() {
         if (isPermissionGranted()) {
-            map.isMyLocationEnabled = true
-        }
-        else {
-            this.requestPermissions(
-                arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION),
-                REQUEST_LOCATION_PERMISSION
-            )
+            getUserLocation()
+        } else {
+            requestLocationPermission()
         }
     }
 
     // Checks that users have given permission
-    private fun isPermissionGranted() : Boolean {
+    private fun isPermissionGranted(): Boolean {
         return ContextCompat.checkSelfPermission(
             requireActivity(),
-            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun getUserLocation() {
+        map.isMyLocationEnabled = true
+        fusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(requireActivity())
+        fusedLocationProviderClient.lastLocation
+            .addOnSuccessListener { location ->
+                location?.let {
+                    val userLocation = LatLng(location.latitude, location.longitude)
+                    map.moveCamera(
+                        CameraUpdateFactory.newLatLngZoom(
+                            userLocation,
+                            DEFAULT_ZOOM_LEVEL
+                        )
+                    )
+                    marker = map.addMarker(
+                        MarkerOptions().position(userLocation).title(getString(R.string.location))
+                    )
+                    marker?.showInfoWindow()
+                }
+            }
+    }
+
+    private fun requestLocationPermission() {
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) ==
+            PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) ==
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            map.isMyLocationEnabled = true
+        } else {
+            this.requestPermissions(
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION
+            )
+        }
     }
 
     // Callback for the result from requesting permissions.
     // This method is invoked for every call on requestPermissions(android.app.Activity, String[], int)
-    @Deprecated("Deprecated in Java")
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
-        grantResults: IntArray) {
+        grantResults: IntArray
+    ) {
         // Check if location permissions are granted and if so enable the
         // location data layer.
         if (requestCode == REQUEST_LOCATION_PERMISSION) {
-            if (grantResults.contains(PackageManager.PERMISSION_GRANTED)) {
-                enableMyLocation()
+            if (grantResults.isNotEmpty() && grantResults.contains(PackageManager.PERMISSION_GRANTED)) {
+                getUserLocation()
+            } else {
+                showRationale()
             }
+        }
+    }
+
+    private fun showRationale() {
+        if (
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                requireActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+        ) {
+            AlertDialog.Builder(requireActivity())
+                .setTitle(R.string.location_permission)
+                .setMessage(R.string.permission_denied_explanation)
+                .setPositiveButton("OK") { _, _ ->
+                    requestLocationPermission()
+                }
+                .create()
+                .show()
+
+        } else {
+            requestLocationPermission()
         }
     }
 

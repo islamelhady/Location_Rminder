@@ -1,10 +1,14 @@
 package com.udacity.project4.base
 
+import android.Manifest
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
+import com.udacity.project4.R
 
 /**
  * Base Fragment to observe on the common LiveData objects
