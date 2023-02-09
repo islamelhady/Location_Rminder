@@ -32,6 +32,7 @@ import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
+import java.util.*
 
 class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
@@ -127,9 +128,25 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     }
 
     // Called when user makes a long press gesture on the map.
-    private fun setMapLongClick(map: GoogleMap){
+    private fun setMapLongClick(map: GoogleMap) {
         map.setOnMapLongClickListener { latLng ->
-            map.addMarker(MarkerOptions().position(latLng))
+            // A snippet is additional text that's displayed after the title.
+            val snippet = String.format(
+                Locale.getDefault(),
+                "Lat: %1$.5f, Long: %2$.5f",
+                latLng.latitude,
+                latLng.longitude
+            )
+            map.clear()
+            marker = map.addMarker(
+                MarkerOptions()
+                    .position(latLng)
+                    .title(getString(R.string.dropped_pin))
+                    .snippet(snippet)
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+            )
+            marker?.showInfoWindow()
+            map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
         }
     }
 
