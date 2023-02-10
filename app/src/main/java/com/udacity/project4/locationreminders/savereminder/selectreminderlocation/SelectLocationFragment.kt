@@ -115,6 +115,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
         enableMyLocation()
         setMapLongClick(map)
+        setPoiClick(map)
     }
 
 
@@ -147,6 +148,18 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
             )
             marker?.showInfoWindow()
             map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
+        }
+    }
+
+    // Places a marker on the map and displays an info window that contains POI name.
+    private fun setPoiClick(map: GoogleMap) {
+        map.setOnPoiClickListener { poi ->
+            val poiMarker = map.addMarker(
+                MarkerOptions()
+                    .position(poi.latLng)
+                    .title(poi.name)
+            )
+            poiMarker.showInfoWindow()
         }
     }
 
