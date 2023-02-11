@@ -51,6 +51,8 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         private const val DEFAULT_ZOOM_LEVEL = 15f
     }
 
+    // This will be used for logging purposes.
+    private val TAG = SelectLocationFragment::class.java.simpleName
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
@@ -116,6 +118,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         enableMyLocation()
         setMapLongClick(map)
         setPoiClick(map)
+        setMapStyle(map)
     }
 
 
@@ -144,7 +147,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                     .position(latLng)
                     .title(getString(R.string.dropped_pin))
                     .snippet(snippet)
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
             )
             marker?.showInfoWindow()
             map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
@@ -154,12 +157,33 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     // Places a marker on the map and displays an info window that contains POI name.
     private fun setPoiClick(map: GoogleMap) {
         map.setOnPoiClickListener { poi ->
+            map.clear()
             val poiMarker = map.addMarker(
                 MarkerOptions()
                     .position(poi.latLng)
                     .title(poi.name)
             )
             poiMarker.showInfoWindow()
+            map.animateCamera(CameraUpdateFactory.newLatLng(poi.latLng))
+        }
+    }
+
+    // Allows map styling and theming to be customized.
+    private fun setMapStyle(map: GoogleMap) {
+        try {
+            // Customize the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            val success = map.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    requireActivity(),
+                    R.raw.map_style
+                )
+            )
+            if (!success) {
+                Log.e(TAG, "Style parsing failed.")
+            }
+        } catch (e: Resources.NotFoundException) {
+            Log.e(TAG, "Can't find style. Error: ", e)
         }
     }
 
