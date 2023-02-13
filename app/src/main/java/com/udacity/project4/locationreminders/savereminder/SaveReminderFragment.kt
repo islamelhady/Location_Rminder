@@ -16,6 +16,7 @@ import android.view.ViewGroup
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
@@ -33,6 +34,7 @@ class SaveReminderFragment : BaseFragment() {
     //Get the view model this time as a single to be shared with the another fragment
     override val _viewModel: SaveReminderViewModel by inject()
     private lateinit var binding: FragmentSaveReminderBinding
+    private lateinit var geofencingClient: GeofencingClient
 
     // This will check what API the device is running.
     private val runningQOrLater = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q
@@ -68,6 +70,9 @@ class SaveReminderFragment : BaseFragment() {
         setDisplayHomeAsUpEnabled(true)
 
         binding.viewModel = _viewModel
+
+        geofencingClient = LocationServices.getGeofencingClient(requireActivity())
+
 
         return binding.root
     }
