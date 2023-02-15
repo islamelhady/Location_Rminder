@@ -1,6 +1,7 @@
 package com.udacity.project4.locationreminders.savereminder
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.app.PendingIntent
 import android.content.Intent
@@ -13,13 +14,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import com.google.android.gms.common.api.ResolvableApiException
-import com.google.android.gms.location.GeofencingClient
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.*
 import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.BuildConfig
 import com.udacity.project4.R
@@ -27,6 +26,8 @@ import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentSaveReminderBinding
 import com.udacity.project4.locationreminders.geofence.GeofenceBroadcastReceiver
+import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
+import com.udacity.project4.utils.GeofenceConstants
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
 
@@ -38,6 +39,8 @@ class SaveReminderFragment : BaseFragment() {
 
     // This will check what API the device is running.
     private val runningQOrLater = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q
+
+    private lateinit var reminderDataItem: ReminderDataItem
 
     // A PendingIntent for the Broadcast Receiver that handles geofence transitions.
     private val geofencePendingIntent: PendingIntent by lazy {
@@ -178,12 +181,70 @@ class SaveReminderFragment : BaseFragment() {
             }
         }
         locationSettingsResponseTask.addOnCompleteListener {
-//            if ( it.isSuccessful ) {
-//                addGeofenceForClue()
-//            }
+            if ( it.isSuccessful ) {
+                addGeofenceForReminder()
+            }
         }
     }
 
+    /**
+      * Adds a Geofence for the current reminder if needed, and removes any existing Geofence. This
+      * method should be called after the user has granted the location permission.
+      */
+    @SuppressLint("MissingPermission")
+    private fun addGeofenceForReminder() {
+        val currentGeofenceData = reminderDataItem
+        // Build the Geofence Object
+        val geofence = Geofence.Builder()
+            // Set the request ID, string to identify the geofence.
+            .setRequestId(currentGeofenceData.id)
+            // Set the circular region of this geofence.
+            .setCircularRegion(
+                currentGeofenceData.latitude!!,
+                currentGeofenceData.longitude!!,
+                GeofenceConstants.GEOFENCE_RADIUS_IN_METERS
+            )
+            // Set the expiration duration of the geofence. This geofence
+            //  never gets expires.
+            .setExpirationDuration(GeofenceConstants.NEVER_EXPIRES)
+            // Set the transition types of interest. Alerts are only generated for these
+            // transition. We track entry and exit transitions in this sample.
+            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+            .build()
+
+        // Build the geofence request
+        val geofencingRequest = GeofencingRequest.Builder()
+            // The INITIAL_TRIGGER_ENTER flag indicates that geofencing service should trigger a
+            // GEOFENCE_TRANSITION_ENTER notification when the geofence is added and if the device
+            // is already inside that geofence.
+            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+            // Add the geofence to be monitored by geofencing service.
+            .addGeofence(geofence)
+            .build()
+
+        // First, remove any existing geofence that use our pending intent
+        geofencingClient.removeGeofences(geofencePendingIntent)?.run {
+            // Regardless of success/failure of the removal, add the new geofence
+            addOnCompleteListener {
+                // Add the new geofence request with the new geofence
+                geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
+                    addOnSuccessListener {
+                        // Geofence added.
+                        Toast.makeText(requireContext(),R.string.geofences_added,
+                            Toast.LENGTH_SHORT)
+                            .show()
+                        Log.e("Add Geofence", geofence.requestId)
+                        // Tell the viewModel that we've reached and save reminder
+                        _viewModel.validateAndSaveReminder(reminderDataItem)
+                    }
+                    addOnFailureListener {
+                        // Failed to add geofence.
+                        Toast.makeText(requireContext(), R.string.geofences_not_added, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
     /**
      *  Determines whether the app has the appropriate permissions across Android 10+ and all other
      *  Android versions.

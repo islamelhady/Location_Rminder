@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.location.Geofence
 import com.udacity.project4.base.BaseRecyclerViewAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -65,4 +66,9 @@ fun View.fadeOut() {
             this@fadeOut.visibility = View.GONE
         }
     })
+}
+
+object GeofenceConstants {
+    const val GEOFENCE_RADIUS_IN_METERS = 100f
+    const val NEVER_EXPIRES = Geofence.NEVER_EXPIRE
 }
