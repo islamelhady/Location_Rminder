@@ -53,7 +53,7 @@ class RemindersListViewModelTest {
 
     @Test
     fun loadReminders_remainderListNotEmpty() = mainCoroutineRule.runBlockingTest {
-        val reminder = ReminderDTO("Title", "Description", "Location", 9.4534, 5.453234)
+        val reminder = ReminderDTO("Title", "Description", "Location", 30.033333, 31.233334)
         remindersFakeDataSource.saveReminder(reminder)
         viewModel.loadReminders()
         assertThat(viewModel.remindersList.getOrAwaitValue()).isNotEmpty()
