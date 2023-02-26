@@ -45,14 +45,14 @@ class SaveReminderViewModelTest {
     }
 
     @Test
-    fun validateEnteredData_EmptyTitleAndUpdateSnackBar() {
+    fun validateEnteredData_emptyTitleAndUpdateSnackBar() {
         val reminder = ReminderDataItem("", "Description", "Location", 30.033333, 31.233334)
         assertThat(viewModel.validateEnteredData(reminder)).isFalse()
         assertThat(viewModel.showSnackBarInt.getOrAwaitValue()).isEqualTo(R.string.err_enter_title)
     }
 
     @Test
-    fun validateEnteredData_EmptyLocationAndUpdateSnackBar() {
+    fun validateEnteredData_emptyLocationAndUpdateSnackBar() {
         val reminder = ReminderDataItem("Title", "Description", "", 30.033333, 31.233334)
         assertThat(viewModel.validateEnteredData(reminder)).isFalse()
         assertThat(viewModel.showSnackBarInt.getOrAwaitValue()).isEqualTo(R.string.err_select_location)
