@@ -7,14 +7,19 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.assertion.ViewAssertions
+import androidx.test.espresso.contrib.RecyclerViewActions
+import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import com.udacity.project4.R
 import com.udacity.project4.locationreminders.data.ReminderDataSource
+import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
@@ -79,6 +84,29 @@ val instantTaskExecutorRule = InstantTaskExecutorRule()
         }
     }
 
+    @Test
+    fun onUI_noDataDisplayed(): Unit = runBlocking {
+        val reminder = ReminderDTO("title", "description", "location", 30.033333, 31.233334)
+        repository.saveReminder(reminder)
+        repository.deleteAllReminders()
+        launchFragmentInContainer<ReminderListFragment>(Bundle(), R.style.AppTheme)
+        onView(withId(R.id.noDataTextView)).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+    }
+
+    @Test
+    fun remindersList_displayInUI(): Unit = runBlocking {
+        val reminder = ReminderDTO("title", "description", "location", 30.033333, 31.233334)
+        repository.saveReminder(reminder)
+        launchFragmentInContainer<ReminderListFragment>(Bundle(), R.style.AppTheme)
+        onView(withId(R.id.reminderssRecyclerView))
+            .perform(
+                RecyclerViewActions.scrollTo<RecyclerView.ViewHolder>(
+                    ViewMatchers.hasDescendant(ViewMatchers.withText(reminder.title))
+                )
+            )
+    }
+
+
     // test the navigation of the fragments.
     @Test
     fun clickFAB_navigateToSaveReminderFragment () {
@@ -90,6 +118,4 @@ val instantTaskExecutorRule = InstantTaskExecutorRule()
         onView(withId(R.id.addReminderFAB)).perform(click())
         verify(navController).navigate(ReminderListFragmentDirections.toSaveReminder())
     }
-//    TODO: test the displayed data on the UI.
-//    TODO: add testing for the error messages.
 }
