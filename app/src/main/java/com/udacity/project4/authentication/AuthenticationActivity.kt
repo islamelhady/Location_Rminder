@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.firebase.ui.auth.AuthUI
@@ -21,6 +22,7 @@ import com.udacity.project4.locationreminders.RemindersActivity
 class AuthenticationActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAuthenticationBinding
+    private val viewModel by viewModels<AuthViewModel>()
 
     companion object {
         const val TAG = "LoginFragment"
@@ -34,6 +36,12 @@ class AuthenticationActivity : AppCompatActivity() {
         binding.lifecycleOwner = this
 
         binding.authButton.setOnClickListener { launchSignInFlow() }
+        viewModel.authState.observe(this){authState ->
+            when(authState){
+                AuthenticationState.AUTHENTICATED -> startReminderActivity()
+                else -> Log.e( TAG, "Authentication doesn't require any UI change $authState")
+            }
+        }
 
     }
 
