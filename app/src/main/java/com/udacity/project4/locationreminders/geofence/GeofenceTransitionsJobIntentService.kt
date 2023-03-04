@@ -10,7 +10,6 @@ import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
-import com.udacity.project4.locationreminders.savereminder.SaveReminderFragment
 import com.udacity.project4.utils.errorMessage
 import com.udacity.project4.utils.sendNotification
 import kotlinx.coroutines.*
@@ -37,8 +36,7 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
     }
 
     override fun onHandleWork(intent: Intent) {
-        if (intent.action == SaveReminderFragment.ACTION_GEOFENCE_EVENT) {
-            val geofencingEvent = GeofencingEvent.fromIntent(intent)
+        val geofencingEvent = GeofencingEvent.fromIntent(intent)
             if (geofencingEvent.hasError()) {
                 val errorMessage = errorMessage(this, geofencingEvent.errorCode)
                 Log.e(TAG, errorMessage)
@@ -49,11 +47,11 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
                 Log.d(TAG, "Geofence found")
             }
         }
-    }
+
 
     private fun sendNotification(triggeringGeofences: List<Geofence>) {
-        for (triggerGeofence in triggeringGeofences) {
-            val requestId = triggerGeofence.requestId
+        triggeringGeofences.forEach{
+            val requestId = it.requestId
 
             //Get the local repository instance
             val remindersLocalRepository: ReminderDataSource by inject()
