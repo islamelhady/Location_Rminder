@@ -127,7 +127,7 @@ class SaveReminderFragment : BaseFragment() {
                     PackageManager.PERMISSION_DENIED))
         {
             Snackbar.make(
-                binding.saveReminderFragment,
+                binding.root,
                 R.string.permission_denied_explanation,
                 Snackbar.LENGTH_INDEFINITE
             )
@@ -139,7 +139,7 @@ class SaveReminderFragment : BaseFragment() {
                     })
                 }.show()
         } else {
-            checkDeviceLocationSettingsAndStartGeofence()
+            checkDeviceLocationSettingsAndStartGeofence(true)
         }
     }
 
