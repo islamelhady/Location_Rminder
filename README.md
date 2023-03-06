@@ -30,4 +30,7 @@ Location Reminder is a TO-DO list app with location reminders that remind the us
 <img src="screens/screenshot5.png" width="25%">
 <img src="screens/screenshot6.png" width="25%">
 <img src="screens/screenshot7.png" width="25%">
+<img src="screens/screenshot8.png" width="25%">
+<img src="screens/screenshot9.png" width="25%">
+<img src="screens/screenshot10.png" width="25%">
 
