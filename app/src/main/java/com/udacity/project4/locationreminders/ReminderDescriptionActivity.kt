@@ -35,5 +35,10 @@ class ReminderDescriptionActivity : AppCompatActivity() {
         val reminderData = intent.extras?.get(EXTRA_ReminderDataItem) as ReminderDataItem
         binding.reminderDataItem = reminderData
         binding.lifecycleOwner = this
+
+        binding.doneBtn.setOnClickListener {
+            val listReminder =Intent(this,RemindersActivity::class.java)
+            startActivity(listReminder)
+        }
     }
 }

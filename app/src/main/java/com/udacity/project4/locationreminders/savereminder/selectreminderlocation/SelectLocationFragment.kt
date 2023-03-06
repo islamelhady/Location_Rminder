@@ -3,12 +3,8 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Intent
-import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.content.res.Resources
-import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -16,15 +12,12 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
-import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
@@ -243,12 +236,19 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                 requireContext(),
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) ==
+            PackageManager.PERMISSION_GRANTED&&
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.POST_NOTIFICATIONS
+            ) ==
             PackageManager.PERMISSION_GRANTED
         ) {
             map.isMyLocationEnabled = true
         } else {
             this.requestPermissions(
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION
+                    ,Manifest.permission.POST_NOTIFICATIONS
+                ), REQUEST_LOCATION_PERMISSION
             )
         }
     }

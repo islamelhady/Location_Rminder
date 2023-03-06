@@ -64,5 +64,17 @@
             app:layout_constraintTop_toBottomOf="@+id/location_textView"
             tools:text="@string/lat_long_snippet"/>
 
+        <Button
+            android:id="@+id/doneBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/colorAccent"
+            android:text="@string/done"
+            android:textAllCaps="false"
+            android:layout_marginTop="@dimen/margin"
+            android:layout_margin="@dimen/margin_normal"
+            android:textSize="@dimen/text_size_large"
+            android:textColor="@color/white"/>
+
     </LinearLayout>
 </layout>
