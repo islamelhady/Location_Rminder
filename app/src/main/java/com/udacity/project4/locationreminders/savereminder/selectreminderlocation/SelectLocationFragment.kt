@@ -236,18 +236,12 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                 requireContext(),
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) ==
-            PackageManager.PERMISSION_GRANTED&&
-            ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.POST_NOTIFICATIONS
-            ) ==
             PackageManager.PERMISSION_GRANTED
         ) {
             map.isMyLocationEnabled = true
         } else {
             this.requestPermissions(
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION
-                    ,Manifest.permission.POST_NOTIFICATIONS
                 ), REQUEST_LOCATION_PERMISSION
             )
         }

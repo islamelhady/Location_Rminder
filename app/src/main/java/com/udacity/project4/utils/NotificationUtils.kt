@@ -1,12 +1,17 @@
 package com.udacity.project4.utils
 
+import android.Manifest
+import android.Manifest.permission.POST_NOTIFICATIONS
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
+import androidx.core.content.ContextCompat
 import com.udacity.project4.BuildConfig
 import com.udacity.project4.R
 import com.udacity.project4.locationreminders.ReminderDescriptionActivity
@@ -49,7 +54,17 @@ fun sendNotification(context: Context, reminderDataItem: ReminderDataItem) {
         .setAutoCancel(true)
         .build()
 
-    notificationManager.notify(getUniqueId(), notification)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && ContextCompat.checkSelfPermission(
+            context,
+            POST_NOTIFICATIONS
+        ) ==
+        PackageManager.PERMISSION_GRANTED
+    ) {
+        notificationManager.notify(getUniqueId(), notification)
+    }else {
+        notificationManager.notify(getUniqueId(), notification)
+    }
+
 }
 
 private fun getUniqueId() = ((System.currentTimeMillis() % 10000).toInt())
